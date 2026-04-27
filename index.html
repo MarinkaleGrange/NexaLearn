@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexaLearn Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="./assets/logo.png" alt="NexaLearn logo">
+        <div>
+          <h1>NexaLearn</h1>
+          <p data-i18n="tagline">Professional, educational and neuro-inclusive tutoring</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <label class="inline-label">Role
+          <select id="roleSelect">
+            <option value="guest">Guest</option>
+            <option value="parent">Parent</option>
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+        <input id="userNameInput" type="text" placeholder="Display name">
+        <button id="signInBtn" class="ghost-btn">Sign In</button>
+        <span id="activeRoleBadge" class="chip">Guest</span>
+        <button id="langToggle" class="ghost-btn">Afrikaans</button>
+      </div>
+    </header>
+
+    <nav class="main-nav" id="mainNav">
+      <button data-view="landing" class="nav-link active" data-i18n="nav_landing">Landing</button>
+      <button data-view="marketplace" class="nav-link" data-i18n="nav_marketplace">Marketplace</button>
+      <button data-view="tutoring" class="nav-link" data-i18n="nav_tutoring">Tutoring Dashboard</button>
+      <button data-view="enrollment" class="nav-link" data-i18n="nav_enrollment">Enrollment</button>
+      <button data-view="saturday" class="nav-link" data-i18n="nav_saturday">Saturday Request</button>
+      <button data-view="customResource" class="nav-link" data-i18n="nav_custom_resource">Custom Resource</button>
+      <button data-view="customer" class="nav-link" data-i18n="nav_customer">Customer Account</button>
+      <button data-view="studentPortal" class="nav-link" data-i18n="nav_student">Student Portal</button>
+      <button data-view="admin" class="nav-link" data-i18n="nav_admin">Admin Panel</button>
+      <button data-view="bookingSuccess" class="nav-link" data-i18n="nav_success">Booking Success</button>
+    </nav>
+
+    <main>
+      <section id="landing" class="view active">
+        <div class="hero">
+          <div>
+            <p class="pill" data-i18n="who_we_are">Who We Are</p>
+            <h2 data-i18n="hero_title">Future-forward tutoring for every kind of learner.</h2>
+            <p data-i18n="mission_statement">
+              NexaLearn delivers customized, inclusive, and engaging learning experiences that meet each student where they are academically, emotionally, and neurologically.
+            </p>
+            <div class="chip-row">
+              <span class="chip">TEFL Certified Tutors</span>
+              <span class="chip" data-i18n="chip_neuro">Neurodiversity-Informed Methods</span>
+              <span class="chip">English + Afrikaans</span>
+            </div>
+          </div>
+          <article class="card">
+            <h3 data-i18n="what_we_offer">What We Offer</h3>
+            <ul>
+              <li data-i18n="offer_1">Personalized lesson plans by pace, strengths, and goals</li>
+              <li data-i18n="offer_2">Reading, literacy, remediation, homework and study support</li>
+              <li data-i18n="offer_3">Interactive digital delivery with structured progress updates</li>
+              <li data-i18n="offer_4">Support for ADHD, dyslexia, autism and multilingual learners</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="marketplace" class="view">
+        <div class="section-head">
+          <h2 data-i18n="market_title">Marketplace</h2>
+          <button class="primary-btn" id="openCartBtn" data-i18n="view_cart">View Cart</button>
+        </div>
+        <div class="filters">
+          <label>Grade
+            <select id="filterGrade"></select>
+          </label>
+          <label>Subject
+            <select id="filterSubject"></select>
+          </label>
+          <label>Language
+            <select id="filterLanguage"></select>
+          </label>
+          <label>Search
+            <input id="searchResource" type="search" placeholder="Search resources">
+          </label>
+        </div>
+        <div id="resourceGrid" class="resource-grid"></div>
+      </section>
+
+      <section id="tutoring" class="view">
+        <div class="section-head">
+          <h2 data-i18n="tutoring_title">Tutoring Dashboard</h2>
+          <p data-i18n="slots_note">Mon-Thu: 08:00-13:00, 14:30-18:00 | Fri: 08:00-16:00 | Saturday by request</p>
+        </div>
+
+        <form id="bookingForm" class="form-grid">
+          <label>Student Name<input type="text" id="studentName" required></label>
+          <label>Date<input type="date" id="bookingDate" required></label>
+          <label>Time Slot<select id="bookingTime" required></select></label>
+          <label>Service Type
+            <select id="serviceType" required>
+              <option>Reading & Literacy Support</option>
+              <option>Language Remediation</option>
+              <option>Homework Help & Study Skills</option>
+              <option>General Tutoring</option>
+            </select>
+          </label>
+          <label>Delivery Mode
+            <select id="deliveryMode" required>
+              <option>Online</option>
+              <option>In-Person</option>
+            </select>
+          </label>
+          <label>Grade Level
+            <select id="gradeLevel" required></select>
+          </label>
+          <label>Language
+            <select id="sessionLanguage" required>
+              <option>English</option>
+              <option>Afrikaans</option>
+            </select>
+          </label>
+          <label>Group Size
+            <select id="groupSize" required>
+              <option value="1">1-on-1</option>
+              <option value="2">Small Group Pod (2 learners)</option>
+              <option value="3">Small Group Pod (3 learners)</option>
+            </select>
+          </label>
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="neuroProgram">
+            <span>Neurodiverse Learner Program (+R50 per lesson)</span>
+          </label>
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="firstEnrollmentFee">
+            <span>First-time enrollment (R150 once-off fee)</span>
+          </label>
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="isFirstBooking">
+            <span>First tutoring booking (50% new student discount)</span>
+          </label>
+          <label>Use Lesson Package
+            <select id="packageUseMode">
+              <option value="no_package">No package</option>
+              <option value="use_existing">Use active package lesson</option>
+            </select>
+          </label>
+        </form>
+
+        <div class="pricing-strip">
+          <article class="card">
+            <h3>Lesson Packages</h3>
+            <ul>
+              <li>Starter Plan: 4 x 30 min for R520</li>
+              <li>Core Plan: 4 x 45 min for R760</li>
+              <li>Boost Plan: 8 x 45 min for R1440</li>
+            </ul>
+            <p class="notice">All lesson packages must be used within 6 weeks of purchase.</p>
+            <label>Purchase Package
+              <select id="packageSelect">
+                <option value="">Select package</option>
+                <option value="starter">Starter Plan - R520</option>
+                <option value="core">Core Plan - R760</option>
+                <option value="boost">Boost Plan - R1440</option>
+              </select>
+            </label>
+            <button id="buyPackageBtn" class="ghost-btn">Buy Package</button>
+          </article>
+          <article class="card">
+            <h3>Checkout</h3>
+            <p id="bookingPrice">Calculated total: R0</p>
+            <label class="checkbox-wrap"><input type="checkbox" id="bookingAgreeTerms"> I agree to Terms</label>
+            <div class="pay-block">
+              <p>Payment Methods: EFT, PayFast, SnapScan</p>
+              <p>SnapScan link: <a href="https://pos.snapscan.io/qr/uajMqmLI" target="_blank" rel="noopener">https://pos.snapscan.io/qr/uajMqmLI</a></p>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://pos.snapscan.io/qr/uajMqmLI" alt="SnapScan QR code">
+              <p>Payment Reference: <code>[StudentName_Month]</code></p>
+            </div>
+            <button id="confirmBookingBtn" class="primary-btn">Confirm Booking</button>
+          </article>
+        </div>
+      </section>
+
+      <section id="enrollment" class="view">
+        <h2>Enrollment Form</h2>
+        <form id="enrollmentForm" class="form-grid">
+          <label>Student Name<input required type="text"></label>
+          <label>Age<input required type="number" min="4" max="20"></label>
+          <label>Home Language<input required type="text"></label>
+          <label>Subjects<input required type="text" placeholder="English, Maths"></label>
+          <label>School Report Upload<input type="file" accept=".pdf,.jpg,.png"></label>
+          <p class="notice full-span">R150 once-off administrative fee applies for first enrollment.</p>
+          <button class="primary-btn full-span" type="submit">Submit Enrollment</button>
+        </form>
+      </section>
+
+      <section id="saturday" class="view">
+        <h2>Saturday Manual Booking Request</h2>
+        <form id="saturdayForm" class="form-grid">
+          <label>Student Name<input required type="text"></label>
+          <label>Preferred Date/Time<input required type="datetime-local"></label>
+          <label>Service Type<input required type="text"></label>
+          <label>Delivery Mode
+            <select><option>Online</option><option>In-Person</option></select>
+          </label>
+          <label>Grade Level<select id="saturdayGrade"></select></label>
+          <label>Language<select><option>English</option><option>Afrikaans</option></select></label>
+          <label>Group Size
+            <select>
+              <option>1-on-1</option>
+              <option>Small Group Pod (2 learners)</option>
+              <option>Small Group Pod (3 learners)</option>
+            </select>
+          </label>
+          <label class="checkbox-wrap"><input type="checkbox"> Neurodiverse Learner Program (+R50)</label>
+          <label class="full-span">Additional notes<textarea rows="3"></textarea></label>
+          <button class="primary-btn full-span" type="submit">Submit Saturday Request</button>
+        </form>
+      </section>
+
+      <section id="customResource" class="view">
+        <h2>Custom Resource Request</h2>
+        <form id="resourceRequestForm" class="form-grid">
+          <label>Student Name<input required type="text"></label>
+          <label>Grade Level<select id="resourceGrade"></select></label>
+          <label>Subject<input required type="text"></label>
+          <label class="full-span">Describe required resource<textarea rows="4" required></textarea></label>
+          <label class="full-span">Homework/Syllabi Upload<input type="file" accept=".pdf,.jpg,.png"></label>
+          <button class="primary-btn full-span" type="submit">Submit Resource Request</button>
+        </form>
+      </section>
+
+      <section id="customer" class="view">
+        <h2>Customer Account</h2>
+        <div class="three-col">
+          <article class="card">
+            <h3>Purchase History</h3>
+            <ul id="purchaseHistory"></ul>
+          </article>
+          <article class="card">
+            <h3>Downloaded Resources</h3>
+            <ul id="downloadedResources"></ul>
+          </article>
+          <article class="card">
+            <h3>Lesson Package Balance</h3>
+            <p>Current Package: <strong id="currentPackage">None</strong></p>
+            <p>Remaining Lessons: <strong id="remainingLessons">0</strong></p>
+            <p>Expiry Date: <strong id="packageExpiry"></strong></p>
+          </article>
+        </div>
+      </section>
+
+      <section id="studentPortal" class="view">
+        <h2>Student Portal</h2>
+        <div class="three-col">
+          <article class="card">
+            <h3>Upcoming Sessions</h3>
+            <ul id="upcomingSessions"></ul>
+          </article>
+          <article class="card">
+            <h3>Session Materials</h3>
+            <ul>
+              <li>Reading comprehension worksheet (PDF)</li>
+              <li>Math fluency practice set (PDF)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Progress Overview</h3>
+            <p>Attendance: 6/7 sessions</p>
+            <p>Remaining Lesson Package Balance: <strong id="portalLessons">0</strong></p>
+          </article>
+        </div>
+      </section>
+
+      <section id="admin" class="view">
+        <h2>Admin Panel</h2>
+        <div class="three-col">
+          <article class="card">
+            <h3>Sales Overview</h3>
+            <p>Total Transactions: <strong id="txnCount">0</strong></p>
+            <p>Total Revenue: <strong id="totalRevenue">R0</strong></p>
+          </article>
+          <article class="card">
+            <h3>Saturday Request Approvals</h3>
+            <ul id="saturdayRequests" class="interactive-list"></ul>
+          </article>
+          <article class="card">
+            <h3>Late Payment Tracking</h3>
+            <p>Late fee after 2 working days: <strong>R50</strong></p>
+            <ul id="latePayments"></ul>
+          </article>
+        </div>
+        <div class="section-head">
+          <p>Terms consent logs recorded: <strong id="consentCount">0</strong></p>
+          <button id="exportDataBtn" class="ghost-btn">Export Local Data (JSON)</button>
+        </div>
+      </section>
+
+      <section id="bookingSuccess" class="view">
+        <article class="card success-card">
+          <h2>Booking Confirmed</h2>
+          <p id="successDetails">No booking recorded yet.</p>
+          <p><strong>Address:</strong> 37 Hosking Street, Brenthurst, Brakpan</p>
+          <p>Confirmation email and 24-hour reminder workflow is queued.</p>
+        </article>
+      </section>
+    </main>
+
+    <aside id="cartDrawer" class="cart-drawer">
+      <div class="drawer-head">
+        <h3>Shopping Cart</h3>
+        <button id="closeCartBtn" class="ghost-btn">Close</button>
+      </div>
+      <ul id="cartItems"></ul>
+      <p>Total: <strong id="cartTotal">R0</strong></p>
+      <label class="checkbox-wrap"><input type="checkbox" id="cartAgreeTerms"> I agree to Terms</label>
+      <div class="pay-block">
+        <p>Payment methods: EFT, PayFast, SnapScan</p>
+        <p>SnapScan: <a href="https://pos.snapscan.io/qr/uajMqmLI" target="_blank" rel="noopener">Pay via link</a></p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://pos.snapscan.io/qr/uajMqmLI" alt="SnapScan QR code">
+        <p>Reference: <code>[StudentName_Month]</code></p>
+      </div>
+      <button id="checkoutBtn" class="primary-btn">Checkout</button>
+    </aside>
+  </div>
+
+  <a class="whatsapp-fab" href="https://wa.me/27660510002" target="_blank" rel="noopener" aria-label="WhatsApp NexaLearn">WhatsApp</a>
+
+  <footer>
+    <span>&copy; NexaLearn</span>
+    <a href="./assets/privacy-policy.pdf" target="_blank" rel="noopener">Privacy Policy</a>
+    <a href="./assets/terms-and-conditions.pdf" target="_blank" rel="noopener">Terms & Conditions</a>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
