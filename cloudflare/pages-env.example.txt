@@ -1,0 +1,14 @@
+# Cloudflare Pages environment variables
+# Add these under Pages -> Settings -> Environment variables.
+
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+SNAPSCAN_LINK=https://pos.snapscan.io/qr/uajMqmLI
+
+# Do NOT add server-only secrets to the client runtime.
+# Keep these in server environment (Workers / Edge Functions only):
+# SUPABASE_SERVICE_ROLE_KEY
+# PAYFAST_MERCHANT_ID
+# PAYFAST_MERCHANT_KEY
+# PAYFAST_PASSPHRASE
+
