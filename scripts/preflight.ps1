@@ -38,6 +38,11 @@ Write-Host ""
 Write-Host "Current remote:" -ForegroundColor Cyan
 git -C $root remote -v
 
-Write-Host ""
-Write-Host "Reminder: Replace placeholder GitHub remote if still unresolved." -ForegroundColor Yellow
-
+$remoteUrl = git -C $root remote get-url origin 2>$null
+if ($LASTEXITCODE -eq 0 -and $remoteUrl -match "<your-username>") {
+  Write-Host ""
+  Write-Host "Reminder: Replace placeholder GitHub remote URL." -ForegroundColor Yellow
+} else {
+  Write-Host ""
+  Write-Host "Remote URL looks resolved." -ForegroundColor Green
+}

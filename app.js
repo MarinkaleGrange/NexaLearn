@@ -1,383 +1,402 @@
-const STORAGE_KEY = "nexaLearnAppStateV2";
-const grades = ["R", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+const STORAGE_KEY = "nexalearn_v4";
+const SUPABASE_URL = "https://eitnvvzsaipuvtbrauuu.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_U3rgdE6ISG0xmDsgeCRM3Q_PPdAaW6r";
 
-const packageCatalog = {
-  starter: { label: "Starter Plan", price: 520, lessons: 4, minutes: 30 },
-  core: { label: "Core Plan", price: 760, lessons: 4, minutes: 45 },
-  boost: { label: "Boost Plan", price: 1440, lessons: 8, minutes: 45 },
-};
-
-const roleAccess = {
-  guest: ["landing", "marketplace", "tutoring", "enrollment", "saturday", "customResource", "bookingSuccess"],
-  parent: ["landing", "marketplace", "tutoring", "enrollment", "saturday", "customResource", "customer", "bookingSuccess"],
-  student: ["landing", "studentPortal", "bookingSuccess"],
-  admin: ["landing", "admin", "bookingSuccess"],
-};
-
-const resources = [
-  { id: 1, title: "Phonics Builder Pack", grade: "R", subject: "Literacy", language: "English", price: 95 },
-  { id: 2, title: "Afrikaans Begrip Oefene", grade: "4", subject: "Afrikaans", language: "Afrikaans", price: 120 },
-  { id: 3, title: "Reading Fluency Cards", grade: "2", subject: "Literacy", language: "English", price: 110 },
-  { id: 4, title: "CAPS Maths Drill Set", grade: "6", subject: "Mathematics", language: "English", price: 145 },
-  { id: 5, title: "Taal Remediering Bundle", grade: "7", subject: "Afrikaans", language: "Afrikaans", price: 150 },
-  { id: 6, title: "Study Skills Planner", grade: "9", subject: "Study Skills", language: "English", price: 80 },
-];
-
-const translations = {
-  en: {
-    tagline: "Professional, educational and neuro-inclusive tutoring",
-    nav_landing: "Landing",
-    nav_marketplace: "Marketplace",
-    nav_tutoring: "Tutoring Dashboard",
-    nav_enrollment: "Enrollment",
-    nav_saturday: "Saturday Request",
-    nav_custom_resource: "Custom Resource",
-    nav_customer: "Customer Account",
-    nav_student: "Student Portal",
-    nav_admin: "Admin Panel",
-    nav_success: "Booking Success",
-    who_we_are: "Who We Are",
-    hero_title: "Future-forward tutoring for every kind of learner.",
-    mission_statement: "NexaLearn delivers customized, inclusive, and engaging learning experiences that meet each student where they are academically, emotionally, and neurologically.",
-    chip_neuro: "Neurodiversity-Informed Methods",
-    what_we_offer: "What We Offer",
-    offer_1: "Personalized lesson plans by pace, strengths, and goals",
-    offer_2: "Reading, literacy, remediation, homework and study support",
-    offer_3: "Interactive digital delivery with structured progress updates",
-    offer_4: "Support for ADHD, dyslexia, autism and multilingual learners",
-    market_title: "Marketplace",
-    view_cart: "View Cart",
-    tutoring_title: "Tutoring Dashboard",
-    slots_note: "Mon-Thu: 08:00-13:00, 14:30-18:00 | Fri: 08:00-16:00 | Saturday by request",
-  },
-  af: {
-    tagline: "Professionele, opvoedkundige en neuro-inklusiewe tutorkunde",
-    nav_landing: "Tuisblad",
-    nav_marketplace: "Markplein",
-    nav_tutoring: "Tutor Paneel",
-    nav_enrollment: "Inskrywing",
-    nav_saturday: "Saterdag Versoek",
-    nav_custom_resource: "Pasgemaakte Hulpbron",
-    nav_customer: "Klient Rekening",
-    nav_student: "Student Portaal",
-    nav_admin: "Admin Paneel",
-    nav_success: "Bespreking Sukses",
-    who_we_are: "Wie Ons Is",
-    hero_title: "Toekomstige tutorondersteuning vir elke tipe leerder.",
-    mission_statement: "NexaLearn lewer pasgemaakte, inklusiewe en boeiende leerervarings wat elke student akademies, emosioneel en neurologies ontmoet waar hulle is.",
-    chip_neuro: "Neurodiversiteit-ingeligte metodes",
-    what_we_offer: "Wat Ons Bied",
-    offer_1: "Persoonlike lesplanne volgens tempo, sterkpunte en doelwitte",
-    offer_2: "Lees, geletterdheid, remediering, huiswerk en studiehulp",
-    offer_3: "Interaktiewe digitale lesse met gestruktureerde vorderingsverslae",
-    offer_4: "Ondersteuning vir ADHD, disleksie, outisme en meertalige leerders",
-    market_title: "Markplein",
-    view_cart: "Bekyk Mandjie",
-    tutoring_title: "Tutor Paneel",
-    slots_note: "Ma-Do: 08:00-13:00, 14:30-18:00 | Vry: 08:00-16:00 | Saterdag op versoek",
-  },
-};
+const supabaseClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 const defaultState = {
-  language: "en",
   role: "guest",
-  userName: "",
-  cart: [],
-  purchases: [],
-  sessions: [],
-  saturdayRequests: [],
-  consentLogs: [],
-  package: null,
-  invoices: [
-    { id: "INV-101", parent: "Parent A", amount: 760, daysOverdue: 3 },
-    { id: "INV-102", parent: "Parent B", amount: 520, daysOverdue: 1 },
+  displayName: "",
+  promoRate: 0,
+  rates: { "30": 130, "45": 190, "60": 250 },
+  packageDeals: [
+    { name: "Starter 4x30", price: 520 },
+    { name: "Core 4x45", price: 760 },
+    { name: "Boost 8x45", price: 1440 },
   ],
+  blockedDates: [],
+  cart: [],
+  products: [],
+  purchases: [],
+  bookings: [],
+  newsletter: [],
+  nextSlots: ["08:00", "09:00", "10:00", "11:00", "14:30", "15:30", "16:30"],
+  user: null,
 };
 
 let state = loadState();
 
-function el(id) {
-  return document.getElementById(id);
-}
+function el(id) { return document.getElementById(id); }
+function money(v) { return `R${Math.round(Number(v || 0))}`; }
+function currentDateKey() { return new Date().toISOString().slice(0, 10); }
 
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...defaultState };
-    const parsed = JSON.parse(raw);
-    return { ...defaultState, ...parsed };
-  } catch (_err) {
+    return raw ? { ...defaultState, ...JSON.parse(raw) } : { ...defaultState };
+  } catch (_e) {
     return { ...defaultState };
   }
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    role: state.role,
+    displayName: state.displayName,
+    promoRate: state.promoRate,
+    rates: state.rates,
+    packageDeals: state.packageDeals,
+    blockedDates: state.blockedDates,
+    cart: state.cart,
+    newsletter: state.newsletter,
+  }));
 }
 
-function populateSelect(selectId, values, withAll = false) {
-  const select = el(selectId);
-  if (!select) return;
-  const options = withAll ? ["All", ...values] : values;
-  select.innerHTML = options.map((value) => `<option value="${value}">${value}</option>`).join("");
+function roleAllowedViews(role) {
+  if (role === "admin") return ["home", "shop", "tutoring", "bookings", "account", "admin", "extras", "contact"];
+  if (role === "customer") return ["home", "shop", "tutoring", "bookings", "account", "extras", "contact"];
+  return ["home", "shop", "tutoring", "bookings", "extras", "contact"];
 }
 
-function isViewAllowed(viewId) {
-  const allowed = roleAccess[state.role] || roleAccess.guest;
-  return allowed.includes(viewId);
+function setView(viewId) {
+  if (!roleAllowedViews(state.role).includes(viewId)) return alert("This section is restricted for your current role.");
+  document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === viewId));
+  document.querySelectorAll("#navTabs button").forEach((btn) => btn.classList.toggle("active", btn.dataset.view === viewId));
 }
 
-function showView(viewId) {
-  if (!isViewAllowed(viewId)) {
-    alert("Access restricted for your current role.");
-    return;
-  }
-  document.querySelectorAll(".view").forEach((section) => {
-    section.classList.toggle("active", section.id === viewId);
-  });
-  document.querySelectorAll(".nav-link").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.view === viewId);
-  });
-}
-
-function renderNavAccess() {
-  document.querySelectorAll(".nav-link").forEach((btn) => {
-    const allowed = isViewAllowed(btn.dataset.view);
+function renderRole() {
+  const userTag = state.user ? ` | ${state.user.email}` : "";
+  el("roleBadge").textContent = `${state.role.toUpperCase()}${userTag}`;
+  document.querySelectorAll("#navTabs button").forEach((btn) => {
+    const allowed = roleAllowedViews(state.role).includes(btn.dataset.view);
     btn.disabled = !allowed;
-    btn.style.opacity = allowed ? "1" : "0.45";
-    btn.style.cursor = allowed ? "pointer" : "not-allowed";
+    btn.style.opacity = allowed ? "1" : ".45";
   });
-  el("activeRoleBadge").textContent = `${state.role.toUpperCase()}${state.userName ? `: ${state.userName}` : ""}`;
 }
 
-function renderTranslations() {
-  const dict = translations[state.language];
-  document.querySelectorAll("[data-i18n]").forEach((node) => {
-    const key = node.getAttribute("data-i18n");
-    if (dict[key]) node.textContent = dict[key];
+function productCategories() { return ["All", ...new Set(state.products.map((p) => p.category))]; }
+function productLevels() { return ["All", ...new Set(state.products.map((p) => p.level))]; }
+
+function renderFilters() {
+  el("categoryFilter").innerHTML = productCategories().map((c) => `<option>${c}</option>`).join("");
+  el("levelFilter").innerHTML = productLevels().map((l) => `<option>${l}</option>`).join("");
+}
+
+function renderProducts() {
+  const category = el("categoryFilter").value || "All";
+  const level = el("levelFilter").value || "All";
+  const search = (el("productSearch").value || "").trim().toLowerCase();
+  const list = state.products.filter((p) => {
+    const c = category === "All" || p.category === category;
+    const l = level === "All" || p.level === level;
+    const s = p.title.toLowerCase().includes(search);
+    return c && l && s;
   });
-  el("langToggle").textContent = state.language === "en" ? "Afrikaans" : "English";
-}
-
-function getBookingBaseRate(groupSize) {
-  if (groupSize === "2") return 130;
-  if (groupSize === "3") return 100;
-  return 190;
-}
-
-function getActivePackage() {
-  if (!state.package) return null;
-  if (new Date(state.package.expiresOn) < new Date()) return null;
-  if (state.package.remainingLessons <= 0) return null;
-  return state.package;
-}
-
-function calculateBookingPrice() {
-  const groupSize = el("groupSize").value;
-  const hasNeuro = el("neuroProgram").checked;
-  const firstEnrollment = el("firstEnrollmentFee").checked;
-  const firstBooking = el("isFirstBooking").checked;
-  const packageUseMode = el("packageUseMode").value;
-  const usingPackage = packageUseMode === "use_existing" && !!getActivePackage();
-
-  let total = usingPackage ? 0 : getBookingBaseRate(groupSize);
-  if (hasNeuro) total += 50;
-  if (firstEnrollment) total += 150;
-  if (firstBooking && !usingPackage) total *= 0.5;
-
-  el("bookingPrice").textContent = `Calculated total: R${Math.round(total)}${usingPackage ? " (Package lesson used)" : ""}`;
-  return Math.round(total);
-}
-
-function getTimeSlotsForDate(inputDate) {
-  if (!inputDate) return ["Select a date first"];
-  const date = new Date(`${inputDate}T12:00:00`);
-  const day = date.getDay();
-  if (day === 6) return ["Saturday manual request only"];
-  if (day === 0) return ["No Sunday slots"];
-  if (day >= 1 && day <= 4) return ["08:00", "09:00", "10:00", "11:00", "12:00", "14:30", "15:30", "16:30", "17:30"];
-  return ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"];
-}
-
-function renderTimeSlots() {
-  const bookingDate = el("bookingDate").value;
-  const slots = getTimeSlotsForDate(bookingDate);
-  el("bookingTime").innerHTML = slots.map((slot) => `<option>${slot}</option>`).join("");
-}
-
-function renderResources() {
-  const grade = el("filterGrade").value;
-  const subject = el("filterSubject").value;
-  const language = el("filterLanguage").value;
-  const search = el("searchResource").value.trim().toLowerCase();
-  const filtered = resources.filter((item) => {
-    const gradeMatch = grade === "All" || item.grade === grade;
-    const subjectMatch = subject === "All" || item.subject === subject;
-    const languageMatch = language === "All" || item.language === language;
-    const searchMatch = item.title.toLowerCase().includes(search);
-    return gradeMatch && subjectMatch && languageMatch && searchMatch;
-  });
-  el("resourceGrid").innerHTML = filtered.map((item) => `
-    <article class="resource-card">
-      <h3>${item.title}</h3>
-      <div class="resource-meta">
-        <span class="meta-pill">Grade ${item.grade}</span>
-        <span class="meta-pill">${item.subject}</span>
-        <span class="meta-pill">${item.language}</span>
+  el("productGrid").innerHTML = list.map((p) => `
+    <article class="product">
+      <img src="${p.thumb || "https://via.placeholder.com/800x500?text=NexaLearn+Resource"}" alt="${p.title}">
+      <div class="body">
+        <h3>${p.title}</h3>
+        <div class="meta"><span>${p.category}</span><span>${p.level}</span></div>
+        <p class="total">${money(p.price)}</p>
+        <div class="row">
+          <a class="btn ghost" href="${p.sampleUrl || "#"}" target="_blank" rel="noopener">Preview</a>
+          <button class="btn primary" data-add="${p.id}">Add to cart</button>
+        </div>
       </div>
-      <p><strong>R${item.price}</strong></p>
-      <button class="primary-btn" data-add-resource="${item.id}">Add to Cart</button>
     </article>
-  `).join("");
+  `).join("") || "<p>No products found.</p>";
 }
 
 function renderCart() {
-  const cartItems = el("cartItems");
-  if (state.cart.length === 0) {
-    cartItems.innerHTML = "<li>No items in cart.</li>";
-  } else {
-    cartItems.innerHTML = state.cart.map((item, idx) => `
-      <li>
-        ${item.title} - R${item.price}
-        <button class="ghost-btn" data-remove-cart="${idx}">Remove</button>
-      </li>
-    `).join("");
-  }
-  const total = state.cart.reduce((sum, item) => sum + item.price, 0);
-  el("cartTotal").textContent = `R${total}`;
+  el("cartItems").innerHTML = state.cart.length
+    ? state.cart.map((i, idx) => `<li>${i.title} - ${money(i.price)} <button class="btn ghost" data-remove="${idx}">Remove</button></li>`).join("")
+    : "<li>Cart is empty.</li>";
+  el("cartTotal").textContent = money(state.cart.reduce((s, i) => s + i.price, 0));
 }
 
-function renderLatePayments() {
-  el("latePayments").innerHTML = state.invoices.map((invoice) => {
-    const lateFee = invoice.daysOverdue > 2 ? 50 : 0;
-    const status = lateFee ? `Late fee applied (R${lateFee})` : "Within grace period";
-    return `<li>${invoice.id} - ${invoice.parent} - ${invoice.daysOverdue} days overdue - ${status}</li>`;
-  }).join("");
+function renderRates() {
+  el("tutoringRates").innerHTML = Object.entries(state.rates).map(([m, r]) => `<li>${m} min: ${money(r)}</li>`).join("");
+  el("packageDeals").innerHTML = state.packageDeals.map((d) => `<li>${d.name}: ${money(d.price)}</li>`).join("");
 }
 
-function renderSaturdayRequestsAdmin() {
-  const list = el("saturdayRequests");
-  if (state.saturdayRequests.length === 0) {
-    list.innerHTML = "<li>No pending Saturday requests.</li>";
+function availableSlotsForDate(dateKey) {
+  if (!dateKey) return [];
+  if (state.blockedDates.includes(dateKey)) return [];
+  const day = new Date(`${dateKey}T12:00:00`).getDay();
+  if (day === 0 || day === 6) return [];
+  const already = state.bookings.filter((b) => b.date === dateKey).map((b) => b.slot);
+  return state.nextSlots.filter((s) => !already.includes(s));
+}
+
+function renderBookingSlots() {
+  const dateKey = el("bookingDate").value;
+  const slots = availableSlotsForDate(dateKey);
+  el("bookingSlot").innerHTML = slots.length ? slots.map((s) => `<option>${s}</option>`).join("") : "<option>No slots available</option>";
+  const blocked = state.blockedDates.includes(dateKey);
+  el("slotPreview").textContent = dateKey ? `${dateKey}: ${blocked ? "Blocked by admin" : `${slots.length} slot(s) available`}` : "Pick a date to see availability.";
+}
+
+function bookingAmount() {
+  const duration = el("duration").value;
+  const base = Number(state.rates[duration] || 0);
+  return Math.max(0, base - (base * Number(state.promoRate || 0) / 100));
+}
+
+function renderBookingAmount() {
+  el("bookingTotal").textContent = `Booking total: ${money(bookingAmount())}`;
+}
+
+function renderAccount() {
+  el("purchaseList").innerHTML = state.purchases.length
+    ? state.purchases.map((p) => `<li>${p.date} - ${p.title} - ${money(p.amount)}</li>`).join("")
+    : "<li>No purchases yet.</li>";
+  el("downloadList").innerHTML = state.purchases.length
+    ? state.purchases.map((p) => `<li><a href="${p.downloadUrl || "#"}" target="_blank" rel="noopener">${p.title}</a></li>`).join("")
+    : "<li>No downloads yet.</li>";
+  el("bookingList").innerHTML = state.bookings.length
+    ? state.bookings.map((b) => `<li>${b.date} ${b.slot} - ${b.student} (${b.type}, ${b.duration} min)</li>`).join("")
+    : "<li>No bookings yet.</li>";
+}
+
+function renderAdminProducts() {
+  el("adminProductList").innerHTML = state.products.map((p) => `
+    <li>${p.title} - ${money(p.price)}
+      <button class="btn ghost" data-edit="${p.id}">Edit Price</button>
+      <button class="btn ghost" data-del="${p.id}">Delete</button>
+    </li>`).join("");
+}
+
+function renderBlockedDates() {
+  el("blockedDates").innerHTML = state.blockedDates.length
+    ? state.blockedDates.map((d, i) => `<li>${d} <button class="btn ghost" data-unblock="${i}">Unblock</button></li>`).join("")
+    : "<li>No blocked dates.</li>";
+}
+
+function renderStats() {
+  const sales = state.purchases.reduce((sum, p) => sum + p.amount, 0);
+  el("salesTotal").textContent = money(sales);
+  el("ordersCount").textContent = String(state.purchases.length);
+  el("bookingsCount").textContent = String(state.bookings.length);
+}
+
+async function ensureProfile(roleChoice, nameChoice) {
+  if (!supabaseClient || !state.user) return;
+  const chosenRole = roleChoice === "admin" ? "admin" : "parent";
+  await supabaseClient.from("profiles").upsert({
+    id: state.user.id,
+    role: chosenRole,
+    full_name: nameChoice || null,
+  });
+}
+
+async function fetchProfileRole() {
+  if (!supabaseClient || !state.user) return "guest";
+  const { data } = await supabaseClient.from("profiles").select("role,full_name").eq("id", state.user.id).maybeSingle();
+  if (!data) return "customer";
+  state.displayName = data.full_name || state.displayName;
+  return data.role === "admin" ? "admin" : "customer";
+}
+
+async function syncProductsFromSupabase() {
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient
+    .from("marketplace_resources")
+    .select("id,title,grade_level,subject,price_zar,file_path")
+    .order("title");
+  if (error || !data) return;
+  state.products = data.map((row) => ({
+    id: String(row.id),
+    title: row.title,
+    category: row.subject || "General",
+    level: row.grade_level || "Mixed",
+    price: Number(row.price_zar || 0),
+    thumb: "",
+    sampleUrl: row.file_path || "#",
+    downloadUrl: row.file_path || "#",
+  }));
+}
+
+async function getOrCreateStudent(studentName) {
+  if (!supabaseClient || !state.user) throw new Error("Login required.");
+  const trimmed = studentName.trim();
+  const { data: existing } = await supabaseClient
+    .from("students")
+    .select("id,student_name")
+    .eq("parent_user_id", state.user.id)
+    .ilike("student_name", trimmed)
+    .limit(1);
+  if (existing && existing.length) return existing[0].id;
+  const { data: created, error } = await supabaseClient
+    .from("students")
+    .insert({
+      parent_user_id: state.user.id,
+      student_name: trimmed,
+      grade_level: "Not set",
+      subjects: "General",
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return created.id;
+}
+
+async function insertConsent(contextLabel) {
+  if (!supabaseClient || !state.user) return;
+  await supabaseClient.from("consent_logs").insert({
+    user_id: state.user.id,
+    context: contextLabel,
+    terms_version: "v1",
+  });
+}
+
+async function createOrderFromCart() {
+  if (!supabaseClient || !state.user) throw new Error("Login required.");
+  const total = state.cart.reduce((s, i) => s + i.price, 0);
+  const { data: order, error: orderError } = await supabaseClient
+    .from("orders")
+    .insert({
+      parent_user_id: state.user.id,
+      total_zar: total,
+      payment_method: "SnapScan",
+      payment_reference: "[StudentName_Month]",
+      status: "paid",
+    })
+    .select("id")
+    .single();
+  if (orderError) throw orderError;
+
+  const items = state.cart.map((item) => ({
+    order_id: order.id,
+    resource_id: item.id,
+    price_zar: item.price,
+  }));
+  const { error: itemError } = await supabaseClient.from("order_items").insert(items);
+  if (itemError) throw itemError;
+}
+
+async function createBooking(booking) {
+  if (!supabaseClient || !state.user) throw new Error("Login required.");
+  const studentId = await getOrCreateStudent(booking.student);
+  const { error } = await supabaseClient.from("tutoring_bookings").insert({
+    student_id: studentId,
+    session_date: booking.date,
+    session_time: booking.slot,
+    service_type: booking.service,
+    delivery_mode: booking.type,
+    session_language: "English",
+    group_size: 1,
+    neuro_addon: false,
+    amount_zar: booking.amount,
+  });
+  if (error) throw error;
+}
+
+async function insertOrUpdateProduct(product, existingId = null) {
+  if (!supabaseClient) throw new Error("Supabase unavailable.");
+  if (existingId) {
+    const { error } = await supabaseClient
+      .from("marketplace_resources")
+      .update({
+        title: product.title,
+        grade_level: product.level,
+        subject: product.category,
+        price_zar: product.price,
+      })
+      .eq("id", existingId);
+    if (error) throw error;
     return;
   }
-  list.innerHTML = state.saturdayRequests.map((req, index) => `
-    <li>
-      <strong>${req.student}</strong> - ${req.dateTime} - ${req.status}
-      <div class="action-row">
-        <button class="ghost-btn" data-approve-request="${index}">Approve</button>
-        <button class="ghost-btn" data-reject-request="${index}">Reject</button>
-      </div>
-    </li>
-  `).join("");
+  const { error } = await supabaseClient.from("marketplace_resources").insert({
+    title: product.title,
+    grade_level: product.level,
+    subject: product.category,
+    language: "English",
+    price_zar: product.price,
+    file_path: product.downloadUrl || null,
+  });
+  if (error) throw error;
 }
 
-function renderAccountData() {
-  el("purchaseHistory").innerHTML = state.purchases.length
-    ? state.purchases.map((purchase) => `<li>${purchase}</li>`).join("")
-    : "<li>No purchases yet.</li>";
+async function deleteProductRemote(id) {
+  if (!supabaseClient) return;
+  await supabaseClient.from("marketplace_resources").delete().eq("id", id);
+}
 
-  el("downloadedResources").innerHTML = state.purchases.length
-    ? state.purchases.map((purchase) => `<li>${purchase} (PDF download)</li>`).join("")
-    : "<li>No downloads yet.</li>";
+async function refreshAccountFromSupabase() {
+  if (!supabaseClient || !state.user) return;
 
-  el("upcomingSessions").innerHTML = state.sessions.length
-    ? state.sessions.map((session) => `<li>${session}</li>`).join("")
-    : "<li>No sessions booked yet.</li>";
+  const { data: orders } = await supabaseClient
+    .from("orders")
+    .select("id,total_zar,created_at,status");
+  const { data: items } = await supabaseClient
+    .from("order_items")
+    .select("order_id,price_zar,resource_id,marketplace_resources(title,file_path)");
+  const orderMap = new Map((orders || []).map((o) => [o.id, o]));
+  state.purchases = (items || []).map((it) => {
+    const ord = orderMap.get(it.order_id);
+    return {
+      date: ord?.created_at?.slice(0, 10) || currentDateKey(),
+      title: it.marketplace_resources?.title || "Resource",
+      amount: Number(it.price_zar || 0),
+      downloadUrl: it.marketplace_resources?.file_path || "#",
+    };
+  });
 
-  const revenue = state.purchases.reduce((sum, item) => {
-    const value = Number(item.match(/R(\d+)/)?.[1] || 0);
-    return sum + value;
-  }, 0);
-  el("txnCount").textContent = String(state.purchases.length);
-  el("totalRevenue").textContent = `R${revenue}`;
-  el("consentCount").textContent = String(state.consentLogs.length);
-
-  const activePackage = getActivePackage();
-  if (activePackage) {
-    el("currentPackage").textContent = activePackage.packageLabel;
-    el("remainingLessons").textContent = String(activePackage.remainingLessons);
-    el("portalLessons").textContent = String(activePackage.remainingLessons);
-    el("packageExpiry").textContent = activePackage.expiresOn;
-  } else if (state.package) {
-    el("currentPackage").textContent = `${state.package.packageLabel} (Expired/Used)`;
-    el("remainingLessons").textContent = String(state.package.remainingLessons);
-    el("portalLessons").textContent = String(state.package.remainingLessons);
-    el("packageExpiry").textContent = state.package.expiresOn;
+  const { data: students } = await supabaseClient.from("students").select("id");
+  const studentIds = (students || []).map((s) => s.id);
+  if (studentIds.length) {
+    const { data: bookings } = await supabaseClient
+      .from("tutoring_bookings")
+      .select("session_date,session_time,service_type,delivery_mode,amount_zar,students(student_name)")
+      .in("student_id", studentIds);
+    state.bookings = (bookings || []).map((b) => ({
+      date: b.session_date,
+      slot: b.session_time,
+      student: b.students?.student_name || "Student",
+      type: b.delivery_mode,
+      duration: "45",
+      service: b.service_type,
+      amount: Number(b.amount_zar || 0),
+    }));
   } else {
-    el("currentPackage").textContent = "None";
-    el("remainingLessons").textContent = "0";
-    el("portalLessons").textContent = "0";
-    el("packageExpiry").textContent = "Not purchased";
+    state.bookings = [];
   }
-
-  renderSaturdayRequestsAdmin();
-  renderLatePayments();
 }
 
-function logConsent(contextLabel) {
-  state.consentLogs.push({
-    context: contextLabel,
-    role: state.role,
-    userName: state.userName || "Anonymous",
-    timestamp: new Date().toISOString(),
-  });
-}
-
-function purchasePackage(packageKey) {
-  const packageInfo = packageCatalog[packageKey];
-  if (!packageInfo) return;
-  const expires = new Date();
-  expires.setDate(expires.getDate() + 42);
-  state.package = {
-    packageKey,
-    packageLabel: packageInfo.label,
-    remainingLessons: packageInfo.lessons,
-    expiresOn: expires.toISOString().slice(0, 10),
-  };
-  state.purchases.push(`${packageInfo.label} - R${packageInfo.price}`);
-  saveState();
-  renderAccountData();
-  alert(`${packageInfo.label} purchased successfully.`);
-}
-
-function setupEvents() {
-  el("mainNav").addEventListener("click", (event) => {
-    if (event.target.matches("[data-view]")) showView(event.target.dataset.view);
+function wireEvents() {
+  el("navTabs").addEventListener("click", (e) => {
+    if (e.target.matches("[data-view]")) setView(e.target.dataset.view);
   });
 
-  el("signInBtn").addEventListener("click", () => {
+  el("loginBtn").addEventListener("click", async () => {
     state.role = el("roleSelect").value;
-    state.userName = el("userNameInput").value.trim();
+    state.displayName = el("displayName").value.trim();
     saveState();
-    renderNavAccess();
-    showView("landing");
+    if (state.user) {
+      try {
+        await ensureProfile(state.role, state.displayName);
+        state.role = await fetchProfileRole();
+      } catch (_e) {}
+    } else {
+      state.role = state.role === "admin" ? "admin" : "customer";
+    }
+    renderRole();
+    if (state.role !== "admin" && document.querySelector("#admin.view.active")) setView("home");
   });
 
-  el("langToggle").addEventListener("click", () => {
-    state.language = state.language === "en" ? "af" : "en";
-    saveState();
-    renderTranslations();
-  });
+  el("categoryFilter").addEventListener("change", renderProducts);
+  el("levelFilter").addEventListener("change", renderProducts);
+  el("productSearch").addEventListener("input", renderProducts);
 
-  ["filterGrade", "filterSubject", "filterLanguage", "searchResource"].forEach((id) => {
-    el(id).addEventListener("input", renderResources);
-  });
-
-  el("resourceGrid").addEventListener("click", (event) => {
-    const addId = event.target.getAttribute("data-add-resource");
-    if (!addId) return;
-    const item = resources.find((entry) => entry.id === Number(addId));
-    if (!item) return;
-    state.cart.push(item);
-    saveState();
-    renderCart();
-  });
-
-  el("cartItems").addEventListener("click", (event) => {
-    const removeIdx = event.target.getAttribute("data-remove-cart");
-    if (removeIdx === null) return;
-    state.cart.splice(Number(removeIdx), 1);
+  el("productGrid").addEventListener("click", (e) => {
+    const id = e.target.getAttribute("data-add");
+    if (!id) return;
+    const product = state.products.find((p) => p.id === id);
+    if (!product) return;
+    state.cart.push(product);
     saveState();
     renderCart();
   });
@@ -385,148 +404,248 @@ function setupEvents() {
   el("openCartBtn").addEventListener("click", () => el("cartDrawer").classList.add("open"));
   el("closeCartBtn").addEventListener("click", () => el("cartDrawer").classList.remove("open"));
 
-  el("checkoutBtn").addEventListener("click", () => {
-    if (!el("cartAgreeTerms").checked) {
-      alert("You must agree to Terms before checkout.");
-      return;
-    }
-    if (state.cart.length === 0) {
-      alert("Your cart is empty.");
-      return;
-    }
-    logConsent("Marketplace checkout");
-    state.cart.forEach((item) => state.purchases.push(`${item.title} - R${item.price}`));
-    state.cart = [];
+  el("cartItems").addEventListener("click", (e) => {
+    const idx = e.target.getAttribute("data-remove");
+    if (idx === null) return;
+    state.cart.splice(Number(idx), 1);
     saveState();
     renderCart();
-    renderAccountData();
-    alert("Marketplace checkout successful.");
   });
 
-  ["groupSize", "neuroProgram", "firstEnrollmentFee", "isFirstBooking", "packageUseMode"]
-    .forEach((id) => el(id).addEventListener("change", calculateBookingPrice));
+  el("checkoutBtn").addEventListener("click", async () => {
+    if (!el("termsCart").checked) return alert("Please agree to Terms.");
+    if (!el("paidCart").checked) return alert("Payment required to confirm purchase.");
+    if (!state.cart.length) return alert("Cart is empty.");
+    if (!state.user) return alert("Please sign in first (Supabase auth) before checkout.");
 
-  el("bookingDate").addEventListener("change", () => {
-    renderTimeSlots();
-    const date = new Date(`${el("bookingDate").value}T12:00:00`);
-    if (date.getDay() === 6) {
-      showView("saturday");
-      alert("Saturday calendar slots are disabled. Please submit a manual Saturday request.");
-    }
-  });
-
-  el("buyPackageBtn").addEventListener("click", () => {
-    const packageKey = el("packageSelect").value;
-    if (!packageKey) {
-      alert("Select a package first.");
-      return;
-    }
-    purchasePackage(packageKey);
-  });
-
-  el("confirmBookingBtn").addEventListener("click", () => {
-    if (!el("bookingAgreeTerms").checked) {
-      alert("You must agree to Terms before booking checkout.");
-      return;
-    }
-
-    const slotText = el("bookingTime").value || "";
-    if (slotText.includes("Saturday manual request") || slotText.includes("No Sunday")) {
-      alert("Please submit a manual Saturday request.");
-      return;
-    }
-
-    const packageUseMode = el("packageUseMode").value;
-    const activePackage = getActivePackage();
-    const usingPackage = packageUseMode === "use_existing";
-    if (usingPackage && !activePackage) {
-      alert("No valid active package available. Buy a package or switch to no package.");
-      return;
-    }
-
-    logConsent("Tutoring checkout");
-    const total = calculateBookingPrice();
-    const student = el("studentName").value.trim() || "Student";
-    const detail = `${student} | ${el("bookingDate").value} ${el("bookingTime").value} | ${el("serviceType").value} | Group ${el("groupSize").value} | R${total}`;
-    state.sessions.push(detail);
-    state.purchases.push(`Tutoring Session - R${total}`);
-    if (usingPackage && activePackage) {
-      state.package.remainingLessons -= 1;
-    }
-    el("successDetails").textContent = detail;
-    saveState();
-    renderAccountData();
-    showView("bookingSuccess");
-  });
-
-  el("saturdayForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const student = event.target.querySelector("input[type='text']").value.trim() || "Student";
-    const dateTime = event.target.querySelector("input[type='datetime-local']").value;
-    state.saturdayRequests.push({
-      student,
-      dateTime,
-      status: "Pending",
-    });
-    saveState();
-    renderAccountData();
-    alert("Saturday request submitted for admin approval.");
-    event.target.reset();
-  });
-
-  el("saturdayRequests").addEventListener("click", (event) => {
-    const approveIdx = event.target.getAttribute("data-approve-request");
-    const rejectIdx = event.target.getAttribute("data-reject-request");
-    if (approveIdx !== null) {
-      state.saturdayRequests[Number(approveIdx)].status = "Approved";
+    try {
+      await createOrderFromCart();
+      await insertConsent("Marketplace checkout");
+      await refreshAccountFromSupabase();
+      state.cart = [];
       saveState();
-      renderAccountData();
+      renderCart();
+      renderAccount();
+      renderStats();
+      el("cartDrawer").classList.remove("open");
+      alert("Checkout complete. Downloads are now available in My Account.");
+    } catch (err) {
+      alert(`Checkout failed: ${err.message || "Unknown error"}`);
     }
-    if (rejectIdx !== null) {
-      state.saturdayRequests[Number(rejectIdx)].status = "Rejected";
+  });
+
+  el("bookingDate").addEventListener("change", renderBookingSlots);
+  el("duration").addEventListener("change", renderBookingAmount);
+
+  el("bookingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const date = el("bookingDate").value;
+    const slot = el("bookingSlot").value;
+    if (!date || !slot || slot === "No slots available") return alert("Please select an available slot.");
+    if (!el("termsBooking").checked) return alert("Please agree to Terms.");
+    if (!el("paidBooking").checked) return alert("Payment required to confirm booking.");
+    if (!state.user) return alert("Please sign in first (Supabase auth) before booking.");
+
+    const booking = {
+      student: el("studentName").value.trim(),
+      date,
+      slot,
+      type: el("sessionType").value,
+      duration: el("duration").value,
+      service: el("serviceName").value,
+      amount: bookingAmount(),
+    };
+    try {
+      await createBooking(booking);
+      await insertConsent("Tutoring checkout");
+      await refreshAccountFromSupabase();
+      renderBookingSlots();
+      renderAccount();
+      renderStats();
+      e.target.reset();
+      renderBookingAmount();
+      alert("Booking confirmed. Confirmation email queued.");
+    } catch (err) {
+      alert(`Booking failed: ${err.message || "Unknown error"}`);
+    }
+  });
+
+  el("productForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (state.role !== "admin") return alert("Admin only.");
+    const product = {
+      title: el("pTitle").value.trim(),
+      category: el("pCategory").value.trim(),
+      level: el("pLevel").value.trim(),
+      price: Number(el("pPrice").value),
+      thumb: el("pThumb").value.trim(),
+      sampleUrl: el("pSample").value.trim() || "#",
+      downloadUrl: el("pDownload").value.trim() || "#",
+    };
+    try {
+      await insertOrUpdateProduct(product, null);
+      await syncProductsFromSupabase();
       saveState();
-      renderAccountData();
+      renderFilters();
+      renderProducts();
+      renderAdminProducts();
+      e.target.reset();
+    } catch (err) {
+      alert(`Could not save product. ${err.message || ""}`);
     }
   });
 
-  ["enrollmentForm", "resourceRequestForm"].forEach((formId) => {
-    el(formId).addEventListener("submit", (event) => {
-      event.preventDefault();
-      alert("Form submitted for review.");
-      event.target.reset();
-    });
+  el("adminProductList").addEventListener("click", async (e) => {
+    const editId = e.target.getAttribute("data-edit");
+    const delId = e.target.getAttribute("data-del");
+    if (editId) {
+      const p = state.products.find((x) => x.id === editId);
+      if (!p) return;
+      const next = prompt(`New price for ${p.title}`, String(p.price));
+      if (!next) return;
+      p.price = Number(next);
+      try { await insertOrUpdateProduct(p, editId); } catch (err) { alert(`Price update failed: ${err.message || ""}`); }
+    }
+    if (delId) {
+      state.products = state.products.filter((x) => x.id !== delId);
+      try { await deleteProductRemote(delId); } catch (_e) {}
+    }
+    await syncProductsFromSupabase();
+    saveState();
+    renderFilters();
+    renderProducts();
+    renderAdminProducts();
   });
 
-  el("exportDataBtn").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "nexalearn-local-export.json";
-    link.click();
-    URL.revokeObjectURL(url);
+  el("pricingForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (state.role !== "admin") return alert("Admin only.");
+    state.rates["30"] = Number(el("rate30").value || state.rates["30"]);
+    state.rates["45"] = Number(el("rate45").value || state.rates["45"]);
+    state.rates["60"] = Number(el("rate60").value || state.rates["60"]);
+    state.promoRate = Number(el("promoRate").value || 0);
+    saveState();
+    renderRates();
+    renderBookingAmount();
+    alert("Pricing updated.");
+  });
+
+  el("blockDateForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (state.role !== "admin") return alert("Admin only.");
+    const date = el("blockDate").value;
+    if (!date) return;
+    if (!state.blockedDates.includes(date)) state.blockedDates.push(date);
+    saveState();
+    renderBlockedDates();
+    renderBookingSlots();
+    e.target.reset();
+  });
+
+  el("blockedDates").addEventListener("click", (e) => {
+    const idx = e.target.getAttribute("data-unblock");
+    if (idx === null) return;
+    state.blockedDates.splice(Number(idx), 1);
+    saveState();
+    renderBlockedDates();
+    renderBookingSlots();
+  });
+
+  el("newsletterForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = el("newsletterEmail").value.trim();
+    if (!email) return;
+    state.newsletter.push({ email, date: new Date().toISOString() });
+    saveState();
+    alert("Newsletter signup complete.");
+    e.target.reset();
+  });
+
+  el("contactForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    alert("Thank you. Your inquiry has been received.");
+    e.target.reset();
   });
 }
 
-function init() {
-  populateSelect("gradeLevel", grades);
-  populateSelect("saturdayGrade", grades);
-  populateSelect("resourceGrade", grades);
-  populateSelect("filterGrade", grades, true);
-  populateSelect("filterSubject", [...new Set(resources.map((r) => r.subject))], true);
-  populateSelect("filterLanguage", [...new Set(resources.map((r) => r.language))], true);
+async function bootstrapAuth() {
+  if (!supabaseClient) return;
+  const { data } = await supabaseClient.auth.getSession();
+  state.user = data.session?.user || null;
+  if (state.user) {
+    state.role = await fetchProfileRole();
+  } else {
+    state.role = "guest";
+  }
+}
 
-  el("roleSelect").value = state.role;
-  el("userNameInput").value = state.userName;
+function wireAuthEvents() {
+  if (!supabaseClient) return;
 
-  renderTranslations();
-  renderNavAccess();
-  renderResources();
+  supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+    state.user = session?.user || null;
+    if (state.user) {
+      state.role = await fetchProfileRole();
+      await refreshAccountFromSupabase();
+    } else {
+      state.role = "guest";
+      state.purchases = [];
+      state.bookings = [];
+    }
+    renderRole();
+    renderAccount();
+    renderStats();
+  });
+
+  el("signUpBtn").addEventListener("click", async () => {
+    const email = el("authEmail").value.trim();
+    const password = el("authPassword").value;
+    if (!email || !password) return alert("Enter email and password.");
+    const { error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) return alert(`Sign up failed: ${error.message}`);
+    alert("Sign up successful. Please check your email if confirmation is required.");
+  });
+
+  el("signInBtn").addEventListener("click", async () => {
+    const email = el("authEmail").value.trim();
+    const password = el("authPassword").value;
+    if (!email || !password) return alert("Enter email and password.");
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) return alert(`Sign in failed: ${error.message}`);
+    alert("Signed in.");
+  });
+
+  el("signOutBtn").addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
+    alert("Signed out.");
+  });
+}
+
+async function init() {
+  await bootstrapAuth();
+  await syncProductsFromSupabase();
+  if (state.user) await refreshAccountFromSupabase();
+
+  renderRole();
+  renderFilters();
+  renderProducts();
   renderCart();
-  renderTimeSlots();
-  calculateBookingPrice();
-  renderAccountData();
-  setupEvents();
+  renderRates();
+  renderBookingAmount();
+  renderAccount();
+  renderAdminProducts();
+  renderBlockedDates();
+  renderStats();
+
+  el("roleSelect").value = state.role === "admin" ? "admin" : (state.role === "customer" ? "customer" : "guest");
+  el("displayName").value = state.displayName;
+  el("rate30").value = state.rates["30"];
+  el("rate45").value = state.rates["45"];
+  el("rate60").value = state.rates["60"];
+  el("promoRate").value = state.promoRate;
+
+  wireEvents();
+  wireAuthEvents();
 }
 
 init();
