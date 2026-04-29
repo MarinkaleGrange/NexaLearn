@@ -1,6 +1,7 @@
 const STORAGE_KEY = "nexalearn_v4";
 const SUPABASE_URL = "https://eitnvvzsaipuvtbrauuu.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_U3rgdE6ISG0xmDsgeCRM3Q_PPdAaW6r";
+const PRIMARY_ADMIN_EMAIL = "marinkajvr@gmail.com";
 
 const supabaseClient = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -184,7 +185,8 @@ function renderStats() {
 
 async function ensureProfile(roleChoice, nameChoice) {
   if (!supabaseClient || !state.user) return;
-  const chosenRole = roleChoice === "admin" ? "admin" : "parent";
+  const isPrimaryAdmin = (state.user.email || "").toLowerCase() === PRIMARY_ADMIN_EMAIL;
+  const chosenRole = isPrimaryAdmin ? "admin" : (roleChoice === "admin" ? "admin" : "parent");
   await supabaseClient.from("profiles").upsert({
     id: state.user.id,
     role: chosenRole,
@@ -194,6 +196,14 @@ async function ensureProfile(roleChoice, nameChoice) {
 
 async function fetchProfileRole() {
   if (!supabaseClient || !state.user) return "guest";
+  if ((state.user.email || "").toLowerCase() === PRIMARY_ADMIN_EMAIL) {
+    await supabaseClient.from("profiles").upsert({
+      id: state.user.id,
+      role: "admin",
+      full_name: state.displayName || null,
+    });
+    return "admin";
+  }
   const { data } = await supabaseClient.from("profiles").select("role,full_name").eq("id", state.user.id).maybeSingle();
   if (!data) return "customer";
   state.displayName = data.full_name || state.displayName;
